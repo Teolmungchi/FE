@@ -12,27 +12,28 @@ struct UnderlinedTextField: View {
     let label: String
     @Binding var text: String
     var isSecure: Bool = false
+    var placeholder: String = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             // 라벨(또는 플레이스홀더처럼 보이게)
             Text(label)
-                .foregroundColor(.gray)
+                .foregroundColor(.black)
                 .font(.system(size: 14))
             
-            // 일반 텍스트필드 or SecureField
+            // 일반 텍스트필드 or SecureField with placeholder
             if isSecure {
-                SecureField("", text: $text)
+                SecureField(placeholder, text: $text)
                     .frame(height: 25)
             } else {
-                TextField("", text: $text)
+                TextField(placeholder, text: $text)
                     .frame(height: 25)
             }
             
             // 아래 라인
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(Color.brown)
+                .foregroundColor(.black)
         }
     }
 }

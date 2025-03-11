@@ -17,13 +17,13 @@ struct LoginView: View {
             VStack {
                 Spacer()
                 
-                Image("hairtuft")
+                Image("loginlogo")
                 //                .resizable()
                 //                .scaledToFit()
                 //                .frame(width: 100, height: 100)
                 
                 
-                Spacer().frame(height: 90)
+                Spacer().frame(height: 50)
                 
                 // 아이디 입력 필드
                 UnderlinedTextField(label: "아이디", text: $userId)
@@ -39,26 +39,27 @@ struct LoginView: View {
                 Button(action: {
                     // 로그인 액션 구현
                 }) {
-                    Text("로그인하기")
+                    Text("로그인")
                         .foregroundColor(.white)
                         .font(.system(size: 16))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.brown)
+                        .background(.black)
                         .cornerRadius(50)
                 }
                 .padding(.horizontal, 40)
-                HStack{
-                    Spacer()
-
-                    NavigationLink(destination: SignUpView()) {
-                        Text("계정이 없으신가요?")
-                            .font(.footnote)
-                            .foregroundColor(Color.brown)
-                    }
-                    .padding(.top, 8)
-                    .padding(.trailing, 58)
+                
+                NavigationLink(destination: SignUpView()) {
+                    Text("회원가입")
+                        .foregroundColor(.white)
+                        .font(.system(size: 16))
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(.black)
+                        .cornerRadius(50)
                 }
+                .padding(.horizontal, 40)
+                .padding(.top, 8)
                 
                 Spacer()
             }
@@ -69,5 +70,3 @@ struct LoginView: View {
 #Preview{
     LoginView()
 }
-
-

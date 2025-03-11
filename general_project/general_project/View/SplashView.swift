@@ -11,7 +11,7 @@ struct SplashView: View {
     var body: some View {
         
         VStack {
-            Image("hairtuft")
+            Image("mainlogo")
         }
         
     }
