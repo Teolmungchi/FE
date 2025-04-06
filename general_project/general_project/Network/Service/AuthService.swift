@@ -14,4 +14,9 @@ class AuthService {
         let newUser = User(userId: userId, password: password, name: nickname)
         apiService.createUser(user: newUser, completion: completion)
     }
+    
+    func completeSignIn(userId: String, password: String, completion: @escaping (Result<SignInResponse, APIError>) -> Void) {
+        let login = SignInRequest(userId: userId, password: password)
+        apiService.Signin(userInfo: login, completion: completion)
+    }
 }

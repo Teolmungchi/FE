@@ -24,3 +24,20 @@ struct SignUpResponse: Codable {
     let statusCode: Int?      // 실패 시 status code (예: 400)
 }
 
+struct Token: Codable {
+    let accessToken: String
+    let refreshToken: String
+}
+
+struct SignInResponse: Codable {
+    let success: Bool
+    let data: Token?
+    let error: String?
+    let statusCode: Int?
+    let message: String?
+}
+
+struct SignInRequest: Codable {
+    let userId: String
+    let password: String
+}

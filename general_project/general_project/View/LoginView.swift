@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct LoginView: View {
-    @State private var userId: String = ""
-    @State private var password: String = ""
+    @StateObject private var viewModel = SignInViewModel()
+
+    
     
     var body: some View {
         NavigationView {
@@ -26,18 +27,18 @@ struct LoginView: View {
                 Spacer().frame(height: 50)
                 
                 // 아이디 입력 필드
-                UnderlinedTextField(label: "아이디", text: $userId)
+                UnderlinedTextField(label: "아이디", text: $viewModel.userId)
                     .padding(.horizontal, 40)
                 
                 // 비밀번호 입력 필드
-                UnderlinedTextField(label: "비밀번호", text: $password, isSecure: true)
+                UnderlinedTextField(label: "비밀번호", text: $viewModel.password, isSecure: true)
                     .padding(.horizontal, 40)
                     .padding(.top, 20)
                 
                 Spacer().frame(height: 40)
                 
                 Button(action: {
-                    // 로그인 액션 구현
+                    viewModel.completeSignIn()
                 }) {
                     Text("로그인")
                         .foregroundColor(.white)
