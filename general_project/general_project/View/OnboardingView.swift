@@ -71,16 +71,10 @@ struct OnboardingView: View {
             
             // 하단 "다음으로" 버튼
             Button(action: {
-                if currentTab < pages.count - 1 {
-                    withAnimation {
-                        currentTab += 1
-                    }
-                } else {
-                    // 온보딩을 끝내고 메인 화면으로 이동하는 로직 작성
                     print("온보딩 완료!")
-                }
+                
             }) {
-                Text(currentTab < pages.count - 1 ? "다음으로" : "시작하기")
+                Text("시작하기")
                     .foregroundColor(.white)
                     .frame(height: 50)
                     .frame(maxWidth: .infinity)
