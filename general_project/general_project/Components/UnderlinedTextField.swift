@@ -25,9 +25,13 @@ struct UnderlinedTextField: View {
             if isSecure {
                 SecureField(placeholder, text: $text)
                     .frame(height: 25)
+                    .autocapitalization(.none)
+
             } else {
                 TextField(placeholder, text: $text)
                     .frame(height: 25)
+                    .autocapitalization(.none)
+
             }
             
             // 아래 라인
