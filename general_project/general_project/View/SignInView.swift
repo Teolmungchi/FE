@@ -13,16 +13,12 @@ struct SignInView: View {
     
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             
             VStack {
                 Spacer()
                 
                 Image("loginlogo")
-                //                .resizable()
-                //                .scaledToFit()
-                //                .frame(width: 100, height: 100)
-                
                 
                 Spacer().frame(height: 50)
                 
@@ -63,8 +59,12 @@ struct SignInView: View {
                 .padding(.top, 8)
                 
                 Spacer()
+                
             }
             .background(Color.white.ignoresSafeArea()) // 전체 배경 흰색
+            .navigationDestination(isPresented: $viewModel.loginSucceeded) {
+                            OnboardingView()
+                        }
         }
     }
 }

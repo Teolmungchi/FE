@@ -32,6 +32,8 @@ struct OnboardingPageView: View {
 
             Spacer()
         }
+        .navigationBarHidden(true)
+
     }
 }
 
@@ -72,7 +74,6 @@ struct OnboardingView: View {
             // 하단 "다음으로" 버튼
             Button(action: {
                     print("온보딩 완료!")
-                
             }) {
                 Text("시작하기")
                     .foregroundColor(.white)
@@ -85,6 +86,7 @@ struct OnboardingView: View {
             .padding(.vertical, 16)
         }
         .background(Color.white.ignoresSafeArea())
+        
     }
 }
 

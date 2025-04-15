@@ -12,6 +12,7 @@ class SignInViewModel: ObservableObject {
     @Published var userId: String = ""
     @Published var password: String = ""
     @Published var errorMessage: String? = nil
+    @Published var loginSucceeded: Bool = false
 
     private let authService = AuthService()
 
@@ -23,6 +24,7 @@ class SignInViewModel: ObservableObject {
                 case .success(let response):
                     if response.success {
                         print("로그인 성공!")
+                        self.loginSucceeded = true
 
                         // 성공 후 추가 로직 (예: 화면 전환)
                     } else {
