@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 class SignInViewModel: ObservableObject {
     
@@ -13,6 +14,7 @@ class SignInViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var errorMessage: String? = nil
     @Published var loginSucceeded: Bool = false
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
 
     private let authService = AuthService()
 
@@ -25,7 +27,7 @@ class SignInViewModel: ObservableObject {
                     if response.success {
                         print("로그인 성공!")
                         self.loginSucceeded = true
-
+                        self.isLoggedIn = true
                         // 성공 후 추가 로직 (예: 화면 전환)
                     } else {
                         let message = response.message ?? "알 수 없는 에러"

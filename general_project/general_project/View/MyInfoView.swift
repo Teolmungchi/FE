@@ -8,15 +8,25 @@
 import SwiftUI
 
 struct MyInfoView: View {
-    
+    @StateObject private var viewModel = UserViewModel()
+    private var user: UserInfo? {
+            return viewModel.userInfo
+        }
     var body: some View {
         VStack{
-            userInfoText
-                .padding(.top, 72)
-            Spacer()
-            logoutButton
+            if viewModel.isLoading {
+                ProgressView("로딩 중...")
+            } else if user != nil {
+                userInfoText
+                    .padding(.top, 72)
+                Spacer()
+                logoutButton
+            }
         }
         .padding(.horizontal, 37)
+        .onAppear {
+                    viewModel.loadUserInfo()
+                }
     }
     private var userInfoText: some View {
         Group {
@@ -33,13 +43,13 @@ struct MyInfoView: View {
                 
                 Text("닉네임")
                     .font(.title3)
-                Text("셜로기")
+                Text(user?.name ?? "???")
                     .foregroundStyle(.gray)
                     .padding(.bottom, 7)
 
                 Text("이메일")
                     .font(.title3)
-                Text("aaa@navercom")
+                Text("\(user?.login_id ?? "???")")
                     .foregroundStyle(.gray)
                     .padding(.bottom, 92)
 
@@ -49,7 +59,7 @@ struct MyInfoView: View {
     }
     private var logoutButton: some View {
         Button(action: {
-            print("로그아웃 버튼!")
+            viewModel.logout()
         }){ Text("로그아웃")
                 .padding()
                 .frame(width: 152, height: 46)

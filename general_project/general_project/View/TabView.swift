@@ -23,7 +23,7 @@ struct ContentView: View {
                     Text("Pay")
                 }
                 .tag(1)
-            CView()
+            AView()
                 .tabItem {
                     Image(systemName: selection == 2 ? "camera.fill" : "camera")
                     Text("Order")

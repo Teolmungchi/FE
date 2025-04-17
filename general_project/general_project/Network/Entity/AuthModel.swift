@@ -41,3 +41,8 @@ struct SignInRequest: Codable {
     let userId: String
     let password: String
 }
+
+struct LogoutResponse: Codable {
+    let success: Bool
+    let message: String
+}
