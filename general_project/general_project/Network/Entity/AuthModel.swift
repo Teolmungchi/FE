@@ -34,7 +34,7 @@ struct SignInResponse: Codable {
     let data: Token?
     let error: String?
     let statusCode: Int?
-    let message: String?
+    let message: [String]?
 }
 
 struct SignInRequest: Codable {

@@ -24,7 +24,7 @@ enum APIError: Error {
             case .decodingFailed:
                 return "서버 응답을 해석하는 데 실패했습니다."
             case .unauthorized:
-                return "인증이 필요합니다. 다시 로그인해주세요."
+                return "잘못된 형식입니다. 다시 로그인해주세요."
             case .invalidResponse:
                 return "서버 응답이 잘못되었습니다."
             case .customError(let message):
@@ -171,20 +171,34 @@ final class APIService {
             do {
                 let signInResponse = try JSONDecoder().decode(SignInResponse.self, from: data)
                 print("Decoded response: \(signInResponse)")
-                let accessToken = signInResponse.data?.accessToken
-                let refreshToken = signInResponse.data?.refreshToken
+                guard
+                    let accessToken = signInResponse.data?.accessToken,
+                    let refreshToken = signInResponse.data?.refreshToken
+                else {
+                    print("토큰이 없습니다.")
+                    completion(.failure(.unauthorized)) // 또는 .invalidResponse 등 적절한 에러
+                    return
+                }
 
                 // Keychain에 토큰 저장
-                KeychainHelper.shared.save(Data(accessToken!.utf8), service: "com.syproj.general-project", account: "accessToken")
-                KeychainHelper.shared.save(Data(refreshToken!.utf8), service: "com.syproj.general-project", account: "refreshToken")
+                KeychainHelper.shared.save(Data(accessToken.utf8), service: "com.syproj.general-project", account: "accessToken")
+                KeychainHelper.shared.save(Data(refreshToken.utf8), service: "com.syproj.general-project", account: "refreshToken")
                 completion(.success(signInResponse))
-            } catch let decodeError {
+            }catch let decodeError {
                 print("Decoding failed: \(decodeError.localizedDescription)")
                 if let jsonString = String(data: data, encoding: .utf8) {
                     print("Raw JSON response: \(jsonString)")
                 }
-                completion(.failure(.decodingFailed))
+                // 여기서 message 파싱 시도
+                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let message = json["message"] as? String {
+                    completion(.failure(.customError(message)))
+                } else {
+                    completion(.failure(.decodingFailed))
+                }
             }
+
+
         }.resume()
     }
 
