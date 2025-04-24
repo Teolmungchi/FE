@@ -33,10 +33,10 @@ struct SignUpView: View {
                 UnderlinedTextField(label: "아이디", text: $viewModel.userId, placeholder: "이메일 형식으로 입력해주세요")
                     .padding(.horizontal, 40)
             case .enterPassword:
-                UnderlinedTextField(label: "비밀번호", text: $viewModel.password, isSecure: true, placeholder: "4글자 이상 12글자 이하로 입력해주세요")
+                UnderlinedTextField(label: "비밀번호", text: $viewModel.password, isSecure: true, placeholder: "4글자 이상 20글자 이하로 입력해주세요")
                     .padding(.horizontal, 40)
             case .enterNickname:
-                UnderlinedTextField(label: "닉네임", text: $viewModel.nickname, placeholder: "4글자 이상 20글자 이하로 입력해주세요")
+                UnderlinedTextField(label: "닉네임", text: $viewModel.nickname, placeholder: "2글자 이상 20글자 이하로 입력해주세요")
                     .padding(.horizontal, 40)
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)

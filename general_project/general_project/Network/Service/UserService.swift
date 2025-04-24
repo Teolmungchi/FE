@@ -55,4 +55,65 @@ final class UserService {
             }
         }.resume()
     }
+    
+    func updateNickname(newName: String, completion: @escaping (Result<NicknameData, Error>) -> Void) {
+        switch UserAPI.updateNicknameRequest(newName: newName) {
+        case .failure(let apiError):
+            completion(.failure(apiError))
+            return
+        case .success(let request):
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        completion(.failure(error))
+                        return
+                    }
+                    guard let data = data else {
+                        completion(.failure(UserAPIError.requestFailed))
+                        return
+                    }
+                    do {
+                        let decoded = try JSONDecoder().decode(NicknameResponse.self, from: data)
+                        if decoded.success {
+                            completion(.success(decoded.data))
+                        } else {
+                            completion(.failure(UserAPIError.requestFailed))
+                        }
+                    } catch {
+                        completion(.failure(UserAPIError.decodingFailed))
+                    }
+                }
+            }.resume()
+        }
+    }
+    func changePassword(currentPassword: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        switch UserAPI.changePasswordRequest(currentPassword: currentPassword, newPassword: newPassword) {
+        case .failure(let apiError):
+            completion(.failure(apiError))
+            return
+        case .success(let request):
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        completion(.failure(error))
+                        return
+                    }
+                    guard let data = data else {
+                        completion(.failure(UserAPIError.requestFailed))
+                        return
+                    }
+                    do {
+                        let decoded = try JSONDecoder().decode(ChangePasswordResponse.self, from: data)
+                        if decoded.success {
+                            completion(.success(()))
+                        } else {
+                            completion(.failure(UserAPIError.requestFailed))
+                        }
+                    } catch {
+                        completion(.failure(UserAPIError.decodingFailed))
+                    }
+                }
+            }.resume()
+        }
+    }
 }

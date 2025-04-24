@@ -13,6 +13,43 @@ enum UserAPI {
     static var userInfoURL: URL? {
         return URL(string: baseURL + "/api/v1/user")
     }
+    
+    static func updateNicknameRequest(newName: String) -> Result<URLRequest, UserAPIError> {
+        guard let url = URL(string: "\(baseURL)/api/v1/user") else {
+            return .failure(.invalidURL)
+        }
+        guard let tokenData = KeychainHelper.shared.retrieve(service: "com.syproj.general-project", account: "accessToken"),
+              let accessToken = String(data: tokenData, encoding: .utf8) else {
+            return .failure(.unauthorized)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        let body = ["name": newName]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        return .success(request)
+    }
+
+    static func changePasswordRequest(currentPassword: String, newPassword: String) -> Result<URLRequest, UserAPIError> {
+        guard let url = URL(string: "\(baseURL)/api/v1/auth/password") else {
+            return .failure(.invalidURL)
+        }
+        guard let tokenData = KeychainHelper.shared.retrieve(service: "com.syproj.general-project", account: "accessToken"),
+              let accessToken = String(data: tokenData, encoding: .utf8) else {
+            return .failure(.unauthorized)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        let body = [
+            "currentPassword": currentPassword,
+            "newPassword": newPassword
+        ]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        return .success(request)
+    }
 }
 
 enum UserAPIError: Error {

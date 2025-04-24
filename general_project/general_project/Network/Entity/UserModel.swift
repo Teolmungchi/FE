@@ -20,7 +20,24 @@ struct UserInfoInnerResponse: Codable {
 }
 
 struct UserInfo: Codable {
-    let id: Int?
-    let login_id: String?
-    let name: String?
+    var id: Int?
+    var login_id: String?
+    var name: String?
+}
+
+struct NicknameResponse: Codable {
+    let httpStatus: Int
+    let success: Bool
+    let data: NicknameData
+}
+
+struct NicknameData: Codable {
+    let id: Int
+    let name: String
+}
+
+struct ChangePasswordResponse: Codable {
+    let httpStatus: Int
+    let success: Bool
+    let data: String?
 }
