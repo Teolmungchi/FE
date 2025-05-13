@@ -163,7 +163,7 @@ struct MyInfoView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 99))
                     }
                     .padding(.bottom, 70)
-                    .frame(maxWidth: .infinity) // 이 줄 추가!
+                    .frame(maxWidth: .infinity)
 
                 }
             }
