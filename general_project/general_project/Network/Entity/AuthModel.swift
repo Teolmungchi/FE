@@ -34,10 +34,15 @@ struct SignInResponse: Codable {
     let data: Token?
     let error: String?
     let statusCode: Int?
-    let message: String?
+    let message: [String]?
 }
 
 struct SignInRequest: Codable {
     let userId: String
     let password: String
+}
+
+struct LogoutResponse: Codable {
+    let success: Bool
+    let message: String
 }

@@ -12,6 +12,26 @@ enum APIError: Error {
     case decodingFailed
     case requestFailed
     case customError(String)
+    case unauthorized
+    case invalidResponse
+    
+    var localizedDescription: String {
+            switch self {
+            case .invalidURL:
+                return "유효하지 않은 URL입니다."
+            case .requestFailed:
+                return "요청에 실패했습니다. 네트워크 상태를 확인해주세요."
+            case .decodingFailed:
+                return "서버 응답을 해석하는 데 실패했습니다."
+            case .unauthorized:
+                return "잘못된 형식입니다. 다시 로그인해주세요."
+            case .invalidResponse:
+                return "서버 응답이 잘못되었습니다."
+            case .customError(let message):
+                return message
+
+            }
+        }
 }
 
 
@@ -19,6 +39,7 @@ enum APIError: Error {
 enum APIEndpoint {
     case signUp(id: String, password: String, name: String)
     case signIn(id: String, password: String)
+    case logout
     
     //모든 API 요청의 기본 URL
     var baseURL: String {
@@ -33,6 +54,8 @@ enum APIEndpoint {
             return "/api/v1/auth/sign-up"
         case .signIn:
             return "/api/v1/auth/login"
+        case .logout:
+            return "/api/v1/auth/logout"
         }
     }
     
@@ -148,24 +171,74 @@ final class APIService {
             do {
                 let signInResponse = try JSONDecoder().decode(SignInResponse.self, from: data)
                 print("Decoded response: \(signInResponse)")
-                let accessToken = signInResponse.data?.accessToken
-                let refreshToken = signInResponse.data?.refreshToken
+                guard
+                    let accessToken = signInResponse.data?.accessToken,
+                    let refreshToken = signInResponse.data?.refreshToken
+                else {
+                    print("토큰이 없습니다.")
+                    completion(.failure(.unauthorized)) // 또는 .invalidResponse 등 적절한 에러
+                    return
+                }
 
                 // Keychain에 토큰 저장
-                KeychainHelper.shared.save(Data(accessToken!.utf8), service: "com.syproj.general-project", account: "accessToken")
-                KeychainHelper.shared.save(Data(refreshToken!.utf8), service: "com.syproj.general-project", account: "refreshToken")
+                KeychainHelper.shared.save(Data(accessToken.utf8), service: "com.syproj.general-project", account: "accessToken")
+                KeychainHelper.shared.save(Data(refreshToken.utf8), service: "com.syproj.general-project", account: "refreshToken")
                 completion(.success(signInResponse))
-            } catch let decodeError {
+            }catch let decodeError {
                 print("Decoding failed: \(decodeError.localizedDescription)")
                 if let jsonString = String(data: data, encoding: .utf8) {
                     print("Raw JSON response: \(jsonString)")
                 }
+                // 여기서 message 파싱 시도
+                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let message = json["message"] as? String {
+                    completion(.failure(.customError(message)))
+                } else {
+                    completion(.failure(.decodingFailed))
+                }
+            }
+
+
+        }.resume()
+    }
+
+    func logout(completion: @escaping (Result<String, APIError>) -> Void) {
+        let endpoint = APIEndpoint.logout
+
+        guard let url = endpoint.url else {
+            completion(.failure(.invalidURL))
+            return
+        }
+
+        guard let tokenData = KeychainHelper.shared.retrieve(service: "com.syproj.general-project", account: "accessToken"),
+              let accessToken = String(data: tokenData, encoding: .utf8) else {
+            completion(.failure(.unauthorized))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.requestFailed))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(.requestFailed))
+                return
+            }
+
+            do {
+                let decoded = try JSONDecoder().decode(LogoutResponse.self, from: data)
+                completion(.success(decoded.message))
+            } catch {
                 completion(.failure(.decodingFailed))
             }
         }.resume()
     }
-
-    
 }
 
 

@@ -20,7 +20,7 @@ struct SignInView: View {
                 
                 Image("loginlogo")
                 
-                Spacer().frame(height: 50)
+                Spacer().frame(height: 20)
                 
                 // 아이디 입력 필드
                 UnderlinedTextField(label: "아이디", text: $viewModel.userId)
@@ -30,6 +30,14 @@ struct SignInView: View {
                 UnderlinedTextField(label: "비밀번호", text: $viewModel.password, isSecure: true)
                     .padding(.horizontal, 40)
                     .padding(.top, 20)
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.system(size: 14))
+                        .padding(.top, 4)
+                        .padding(.horizontal, 40)
+                }
+
                 
                 Spacer().frame(height: 40)
                 

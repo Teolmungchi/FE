@@ -39,6 +39,8 @@ struct OnboardingPageView: View {
 
 // 메인 온보딩 뷰
 struct OnboardingView: View {
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+
     // 온보딩 페이지들
     let pages: [OnboardingPage] = [
         OnboardingPage(title: "잃어버린 동물을\n찾을 수 있도록 도와드려요!",
@@ -73,13 +75,13 @@ struct OnboardingView: View {
             
             // 하단 "다음으로" 버튼
             Button(action: {
-                    print("온보딩 완료!")
+                hasCompletedOnboarding = true
             }) {
                 Text("시작하기")
                     .foregroundColor(.white)
                     .frame(height: 50)
                     .frame(maxWidth: .infinity)
-                    .background(Color.black)  // 원하는 색으로 교체 (예: Color.brown)
+                    .background(Color.black)
                     .cornerRadius(10)
                     .padding(.horizontal, 24)
             }

@@ -9,12 +9,22 @@ import SwiftUI
 
 struct RootView: View {
     @State private var showMainView = false
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+    
     
     var body: some View {
         ZStack {
             if showMainView {
-                // 메인 콘텐츠나 이후의 뷰들을 여기에 작성합니다.
-                SignInView()
+                if isLoggedIn {
+                    if hasCompletedOnboarding {
+                        ContentView()
+                    } else {
+                        OnboardingView() 
+                    }
+                } else {
+                    SignInView()
+                }
             } else {
                 SplashView()
                     .onAppear {

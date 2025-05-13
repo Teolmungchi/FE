@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4F00ACC82DD1F34B00790387 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4F00ACC72DD1F34B00790387 /* Kingfisher */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4FFFC5CA2D6AED0100591210 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F00ACC82DD1F34B00790387 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = general_project;
 			packageProductDependencies = (
+				4F00ACC72DD1F34B00790387 /* Kingfisher */,
 			);
 			productName = general_project;
 			productReference = 4FFFC5B92D6AECFF00591210 /* general_project.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 4FFFC5B02D6AECFF00591210;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4F00ACC62DD1F34B00790387 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4FFFC5BA2D6AECFF00591210 /* Products */;
 			projectDirPath = "";
@@ -399,6 +408,9 @@
 				DEVELOPMENT_TEAM = ZWZA259GK8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "general-project-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진을 업로드하기 위해 사용자의 사진 라이브러리에 접근합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +440,9 @@
 				DEVELOPMENT_TEAM = ZWZA259GK8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "general-project-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진을 업로드하기 위해 사용자의 사진 라이브러리에 접근합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -558,6 +573,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4F00ACC62DD1F34B00790387 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.3.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4F00ACC72DD1F34B00790387 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F00ACC62DD1F34B00790387 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4FFFC5B12D6AECFF00591210 /* Project object */;
 }
