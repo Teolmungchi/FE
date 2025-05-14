@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4F00ACC82DD1F34B00790387 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4F00ACC72DD1F34B00790387 /* Kingfisher */; };
+		4F00ADB02DD334E400790387 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 4F00ADAF2DD334E400790387 /* SocketIO */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F00ACC82DD1F34B00790387 /* Kingfisher in Frameworks */,
+				4F00ADB02DD334E400790387 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +120,7 @@
 			name = general_project;
 			packageProductDependencies = (
 				4F00ACC72DD1F34B00790387 /* Kingfisher */,
+				4F00ADAF2DD334E400790387 /* SocketIO */,
 			);
 			productName = general_project;
 			productReference = 4FFFC5B92D6AECFF00591210 /* general_project.app */;
@@ -203,6 +206,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4F00ACC62DD1F34B00790387 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				4F00ADAE2DD334E400790387 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4FFFC5BA2D6AECFF00591210 /* Products */;
@@ -416,6 +420,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -448,6 +453,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -583,6 +589,14 @@
 				minimumVersion = 8.3.2;
 			};
 		};
+		4F00ADAE2DD334E400790387 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -590,6 +604,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4F00ACC62DD1F34B00790387 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		4F00ADAF2DD334E400790387 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F00ADAE2DD334E400790387 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */;
+			productName = SocketIO;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

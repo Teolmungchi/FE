@@ -14,32 +14,32 @@ struct ContentView: View {
             HomeView()
                 .tabItem {
                     Image(systemName: selection == 0 ? "house.fill" : "house")
-                    Text("Home")
+                    Text("홈")
                 }
                 .tag(0)
             BView()
                 .tabItem {
                     Image(systemName: selection == 1 ? "archivebox.fill" : "archivebox")
-                    Text("Pay")
+                    Text("보관함")
                 }
                 .tag(1)
             AView()
                 .tabItem {
                     Image(systemName: selection == 2 ? "camera.fill" : "camera")
-                    Text("Order")
+                    Text("신고")
                 }
                 .tag(2)
                 .badge("!")
-            CView()
+            ChatListView()
                 .tabItem {
                     Image(systemName: selection == 3 ? "bubble.fill" : "bubble")
-                    Text("Shop")
+                    Text("채팅")
                 }
                 .tag(3)
             MyInfoView()
                 .tabItem {
                     Image(systemName: selection == 4 ? "gearshape.fill" : "gearshape")
-                    Text("Other")
+                    Text("설정")
                 }
                 .tag(4)
         }
