@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @AppStorage("shouldRefreshFeed") private var shouldRefreshFeed = false
     @State private var navigateToWritePost = false
     @State private var petList: [Feed] = []
     @State private var errorMessage: String?
@@ -20,6 +21,8 @@ struct HomeView: View {
                     NavigationLink(destination: FeedDetailView(feed: feed)) {
                         HomeFeedRow(feed: feed)
                     }
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                 }
                 .listStyle(.plain)
                 .navigationBarTitleDisplayMode(.inline)
@@ -27,16 +30,6 @@ struct HomeView: View {
                     ToolbarItem(placement: .topBarLeading) {
                         Text("실종 동물 찾기")
                             .font(.system(size: 20, weight: .bold))
-                    }
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        Button { } label: {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.black)
-                        }
-                        Button { } label: {
-                            Image(systemName: "bell")
-                                .foregroundColor(.black)
-                        }
                     }
                 }
                 .navigationDestination(isPresented: $navigateToWritePost) {
@@ -59,6 +52,13 @@ struct HomeView: View {
         }
         .onAppear {
             loadFeeds()
+        }
+        .onChange(of: shouldRefreshFeed) { newValue in
+            if newValue {
+                print("🔁 새로고침 실행됨")
+                loadFeeds()
+                shouldRefreshFeed = false
+            }
         }
     }
 

@@ -25,6 +25,7 @@ struct SignUpResponse: Codable {
 }
 
 struct Token: Codable {
+    let userId: Int
     let accessToken: String
     let refreshToken: String
 }
