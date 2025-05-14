@@ -152,40 +152,77 @@ class FeedService {
        }
     
     func fetchFeeds(completion: @escaping (Result<[Feed], Error>) -> Void) {
-            guard let url = FeedAPI.feedListURL else {
-                completion(.failure(APIError.invalidURL))
-                return
-            }
-            // Keychain에서 토큰 가져오기
-            guard let tokenData = KeychainHelper.shared.retrieve(service: "com.syproj.general-project", account: "accessToken"),
-                  let accessToken = String(data: tokenData, encoding: .utf8) else {
-                completion(.failure(APIError.unauthorized))
-                return
-            }
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
-            URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                guard let data = data else {
-                    completion(.failure(APIError.requestFailed))
-                    return
-                }
-                do {
-                    let decoded = try JSONDecoder().decode(FeedListResponse.self, from: data)
-                    if decoded.success, let feeds = decoded.data {
-                        completion(.success(feeds))
-                    } else {
-                        completion(.failure(FeedAPIError.custom(decoded.message ?? "피드 목록을 불러오지 못했습니다.")))
-                    }
-                } catch {
-                    completion(.failure(error))
-                }
-            }.resume()
+        guard let url = FeedAPI.feedListURL else {
+            completion(.failure(APIError.invalidURL))
+            return
         }
+        guard
+            let tokenData = KeychainHelper.shared.retrieve(
+                service: "com.syproj.general-project",
+                account: "accessToken"
+            ),
+            let accessToken = String(data: tokenData, encoding: .utf8)
+        else {
+            completion(.failure(APIError.unauthorized))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            // 1) 네트워크 에러 체크
+            if let error = error {
+                print("🚨 Network error:", error)
+                completion(.failure(error))
+                return
+            }
+            // 2) HTTP 상태코드 로그
+            if let http = response as? HTTPURLResponse {
+                print("🛰 Status code:", http.statusCode)
+                print("🛰 Response headers:", http.allHeaderFields)
+            }
+            guard let data = data else {
+                print("🚨 No data")
+                completion(.failure(APIError.requestFailed))
+                return
+            }
+
+            // 3) 원본 JSON 문자열 찍어 보기
+            if let raw = String(data: data, encoding: .utf8) {
+                print("📦 Raw JSON:\n", raw)
+            } else {
+                print("📦 Unable to decode raw JSON as UTF-8")
+            }
+
+            // 4) JSONSerialization으로 구조 분석
+            do {
+                let jsonObj = try JSONSerialization.jsonObject(with: data)
+                print("🔍 JSON object dump:")
+                dump(jsonObj)    // 키-값 전체 구조를 콘솔에 찍어 줌
+            } catch {
+                print("🔍 JSONSerialization error:", error)
+            }
+
+            // 5) 기존 FeedListResponse로 디코딩 시도
+            do {
+                let decoded = try JSONDecoder().decode(FeedListResponse.self, from: data)
+                print("✅ Decoded FeedListResponse:", decoded)
+                if decoded.success, let feeds = decoded.data {
+                    completion(.success(feeds))
+                } else {
+                    let msg = decoded.message ?? "unknown"
+                    print("⚠️ API returned success=false, message:", msg)
+                    completion(.failure(FeedAPIError.custom(msg)))
+                }
+            } catch {
+                print("❌ Decoding FeedListResponse failed:", error)
+                completion(.failure(error))
+            }
+        }
+        .resume()
+    }
     
+  
 }

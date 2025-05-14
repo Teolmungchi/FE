@@ -21,7 +21,6 @@ struct HomeFeedRow: View {
                 .fill(Color.white)
                 .shadow(color: .gray.opacity(0.3), radius: 4, x: 0, y: 2)
             VStack(alignment: .leading, spacing: 8) {
-                // Kingfisher KFImage 사용
                 KFImage.url(URL(string: feed.fileName ?? ""))
                     .placeholder {
                         ProgressView()
@@ -58,7 +57,5 @@ struct HomeFeedRow: View {
             .padding()
         }
         .padding(.vertical, 8)
-        .listRowSeparator(.hidden)
-        .listRowBackground(Color.clear)
     }
 }

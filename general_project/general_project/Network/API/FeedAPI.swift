@@ -19,6 +19,14 @@ enum FeedAPI {
     }
     
     static var feedListURL: URL? {
-        URL(string: "\(baseURL)/api/v1/feed")
+        URL(string: "\(baseURL)/api/v1/feed/all")
+    }
+    
+    static func updateFeedURL(id: Int) -> URL? {
+        URL(string: "\(baseURL)/api/v1/feed/\(id)")
+    }
+    
+    static func deleteFeedURL(id: Int) -> URL? {
+        URL(string: "\(baseURL)/api/v1/feed/\(id)")
     }
 }
