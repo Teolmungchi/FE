@@ -79,7 +79,9 @@ class FeedService {
                if let http = response as? HTTPURLResponse {
                    print("↩️ [uploadImageToS3] statusCode:", http.statusCode) // ← 디버그
                }
-               let fileName = presignedURL.components(separatedBy: "?").first ?? presignedURL
+               let fileName = presignedURL
+                   .replacingOccurrences(of: "http://tmc.kro.kr:9000/tmc/", with: "")
+                   .components(separatedBy: "?").first ?? presignedURL
                print("✅ [uploadImageToS3] uploaded fileName:", fileName) // ← 디버그
                completion(.success(fileName))
            }.resume()
@@ -178,37 +180,16 @@ class FeedService {
                 completion(.failure(error))
                 return
             }
-            // 2) HTTP 상태코드 로그
-            if let http = response as? HTTPURLResponse {
-                print("🛰 Status code:", http.statusCode)
-                print("🛰 Response headers:", http.allHeaderFields)
-            }
+
             guard let data = data else {
                 print("🚨 No data")
                 completion(.failure(APIError.requestFailed))
                 return
             }
 
-            // 3) 원본 JSON 문자열 찍어 보기
-            if let raw = String(data: data, encoding: .utf8) {
-                print("📦 Raw JSON:\n", raw)
-            } else {
-                print("📦 Unable to decode raw JSON as UTF-8")
-            }
-
-            // 4) JSONSerialization으로 구조 분석
-            do {
-                let jsonObj = try JSONSerialization.jsonObject(with: data)
-                print("🔍 JSON object dump:")
-                dump(jsonObj)    // 키-값 전체 구조를 콘솔에 찍어 줌
-            } catch {
-                print("🔍 JSONSerialization error:", error)
-            }
-
             // 5) 기존 FeedListResponse로 디코딩 시도
             do {
                 let decoded = try JSONDecoder().decode(FeedListResponse.self, from: data)
-                print("✅ Decoded FeedListResponse:", decoded)
                 if decoded.success, let feeds = decoded.data {
                     completion(.success(feeds))
                 } else {
