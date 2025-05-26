@@ -63,12 +63,10 @@ struct HomeView: View {
     }
 
     func loadFeeds() {
-        print("loadFeeds called")
         feedService.fetchFeeds { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let feeds):
-                    print("피드 불러오기 성공: \(feeds.count)개")
                     self.petList = feeds
                 case .failure(let error):
                     print("피드 불러오기 실패: \(error.localizedDescription)")

@@ -10,7 +10,7 @@ import Kingfisher
 
 struct HomeFeedRow: View {
     let feed: Feed
-
+    let imageBaseURL = "http://tmc.kro.kr:9000/tmc/"
     var tags: [String] {
         [feed.lostPlace ?? "", feed.dogType ?? ""]
     }
@@ -21,7 +21,9 @@ struct HomeFeedRow: View {
                 .fill(Color.white)
                 .shadow(color: .gray.opacity(0.3), radius: 4, x: 0, y: 2)
             VStack(alignment: .leading, spacing: 8) {
-                KFImage.url(URL(string: feed.fileName ?? ""))
+                let imageURLString = "\(imageBaseURL)\(feed.fileName ?? "")"
+
+                KFImage.url(URL(string: imageURLString))
                     .placeholder {
                         ProgressView()
                     }
