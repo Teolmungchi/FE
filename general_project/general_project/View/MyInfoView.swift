@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// String Alert를 위한 Identifiable 래퍼
 struct IdentifiableString: Identifiable {
     let id = UUID()
     let value: String
@@ -26,35 +25,84 @@ struct MyInfoView: View {
         return viewModel.userInfo
     }
     
-    // 기본 생성자
     init() {
         _viewModel = StateObject(wrappedValue: UserViewModel())
     }
     
-    // 프리뷰용 생성자
-    init(previewViewModel: UserViewModel) {
-        _viewModel = StateObject(wrappedValue: previewViewModel)
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                if viewModel.isLoading {
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                        Text("정보를 불러오는 중...")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.top, 100)
+                } else if user != nil {
+                    VStack(spacing: 10) {
+                        // 헤더
+                        headerSection
+                        
+                        // 메인 콘텐츠
+                        VStack(spacing: 24) {
+                            accountInfoSection
+                            passwordSection
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 30)
+                        
+                        Spacer(minLength: 40)
+                        
+                        // 로그아웃 버튼
+                        logoutButton
+                    }
+                }
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .onAppear {
+            viewModel.loadUserInfo()
+        }
+        .alert(item: $alertMessage) { msg in
+            Alert(title: Text("알림"), message: Text(msg.value), dismissButton: .default(Text("확인")))
+        }
     }
     
-    var body: some View {
-        VStack {
-            if viewModel.isLoading {
-                ProgressView("로딩 중...")
-            } else if user != nil {
-                VStack(alignment: .leading, spacing: 15) {
-                    Text("내 정보")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .padding(.bottom, 80)
-                    Text("계정 정보")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .padding(.bottom, 3)
-                    
-                    // 닉네임
+    // MARK: - 헤더 섹션
+    private var headerSection: some View {
+        VStack(spacing: 16) {
+            Text("내 정보")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            
+            // 프로필 아이콘
+            Image(systemName: "person.circle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.gray)
+        }
+        .padding(.top, 20)
+        .padding(.bottom, 30)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemBackground))
+    }
+    
+    // MARK: - 계정 정보 섹션
+    private var accountInfoSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            sectionHeader("계정 정보")
+            
+            VStack(spacing: 0) {
+                // 닉네임 행
+                VStack(spacing: 12) {
                     HStack {
-                        Text("닉네임")
-                            .font(.title3)
+                        Label("닉네임", systemImage: "person.fill")
+                            .font(.body)
+                            .fontWeight(.medium)
                         Spacer()
                         if !isEditingNickname {
                             Button("변경") {
@@ -62,118 +110,208 @@ struct MyInfoView: View {
                                 isEditingNickname = true
                             }
                             .font(.caption)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .foregroundColor(.blue)
+                            .clipShape(Capsule())
                         }
                     }
                     
                     if isEditingNickname {
-                        HStack {
-                            TextField("새 닉네임", text: $newNickname)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            Button("저장") {
-                                if newNickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    alertMessage = IdentifiableString(value: "닉네임을 입력하세요.")
-                                } else {
-                                    viewModel.updateNickname(newNickname) { success, message in
-                                        alertMessage = IdentifiableString(value: message)
-                                        if success {
-                                            isEditingNickname = false
-                                        }
-                                    }
+                        VStack(spacing: 12) {
+                            TextField("새 닉네임을 입력하세요", text: $newNickname)
+                                .textFieldStyle(.roundedBorder)
+                                .font(.body)
+                            
+                            HStack(spacing: 12) {
+                                Button("취소") {
+                                    isEditingNickname = false
+                                    newNickname = ""
                                 }
-                            }
-                            Button("취소") {
-                                isEditingNickname = false
-                            }
-                        }
-                    } else {
-                        Text(user?.name ?? "???")
-                            .foregroundStyle(.gray)
-                            .padding(.bottom, 7)
-                    }
-                    
-                    // 이메일
-                    Text("이메일")
-                        .font(.title3)
-                    Text("\(user?.login_id ?? "???")")
-                        .foregroundStyle(.gray)
-                        .padding(.bottom, 30)
-                    
-                    Divider()
-                        .padding(.bottom, 10)
-                    
-                    if isChangingPassword {
-                        VStack(alignment: .leading, spacing: 8) {
-                            SecureField("현재 비밀번호", text: $currentPassword)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            SecureField("새 비밀번호", text: $newPassword)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            HStack {
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color(.systemGray5))
+                                .clipShape(Capsule())
+                                
                                 Button("저장") {
-                                    if currentPassword.isEmpty || newPassword.isEmpty {
-                                        alertMessage = IdentifiableString(value: "비밀번호를 모두 입력하세요.")
+                                    if newNickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                        alertMessage = IdentifiableString(value: "닉네임을 입력하세요.")
                                     } else {
-                                        viewModel.changePassword(currentPassword: currentPassword, newPassword: newPassword) { success, message in
+                                        viewModel.updateNickname(newNickname) { success, message in
                                             alertMessage = IdentifiableString(value: message)
                                             if success {
-                                                isChangingPassword = false
-                                                currentPassword = ""
-                                                newPassword = ""
+                                                isEditingNickname = false
                                             }
                                         }
                                     }
                                 }
-                                .padding(.trailing, 8)
-                                Button("취소") {
-                                    isChangingPassword = false
-                                    currentPassword = ""
-                                    newPassword = ""
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color.blue)
+                                .clipShape(Capsule())
+                            }
+                        }
+                    } else {
+                        HStack {
+                            Text(user?.name ?? "없음")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                    }
+                }
+                .padding(.vertical, 16)
+                
+                Divider()
+                    .padding(.horizontal, -20)
+                
+                // 이메일 행
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Label("이메일", systemImage: "envelope.fill")
+                            .font(.body)
+                            .fontWeight(.medium)
+                        Spacer()
+                    }
+                    
+                    HStack {
+                        Text(user?.login_id ?? "없음")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                }
+                .padding(.vertical, 16)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+    
+    // MARK: - 비밀번호 섹션
+    private var passwordSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            sectionHeader("보안")
+            
+            VStack(spacing: 16) {
+                if isChangingPassword {
+                    VStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("현재 비밀번호")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
+                            SecureField("현재 비밀번호를 입력하세요", text: $currentPassword)
+                                .textFieldStyle(.roundedBorder)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("새 비밀번호")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
+                            SecureField("새 비밀번호를 입력하세요", text: $newPassword)
+                                .textFieldStyle(.roundedBorder)
+                        }
+                        
+                        HStack(spacing: 12) {
+                            Button("취소") {
+                                isChangingPassword = false
+                                currentPassword = ""
+                                newPassword = ""
+                            }
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(Color(.systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            
+                            Button("변경") {
+                                if currentPassword.isEmpty || newPassword.isEmpty {
+                                    alertMessage = IdentifiableString(value: "비밀번호를 모두 입력하세요.")
+                                } else {
+                                    viewModel.changePassword(currentPassword: currentPassword, newPassword: newPassword) { success, message in
+                                        alertMessage = IdentifiableString(value: message)
+                                        if success {
+                                            isChangingPassword = false
+                                            currentPassword = ""
+                                            newPassword = ""
+                                        }
+                                    }
                                 }
                             }
-                        }
-                        .padding(.bottom, 20)
-                    } else {
-                        HStack{
-                            Spacer()
-                            
-                            Button("비밀번호 변경") {
-                                isChangingPassword = true
-                            }
-                            .padding()
-                            .frame(width: 152, height: 46)
-                            .foregroundStyle(.white)
-                            .background(.blue)
-                            .clipShape(RoundedRectangle(cornerRadius: 99))
-                            .padding(.bottom, 20)
-                            
-                            Spacer()
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                     }
-                    
-                    Spacer()
-                    
-                    // 로그아웃 버튼
+                } else {
                     Button(action: {
-                        viewModel.logout()
+                        isChangingPassword = true
                     }) {
-                        Text("로그아웃")
-                            .padding()
-                            .frame(width: 152, height: 46)
-                            .foregroundStyle(.white)
-                            .background(.red)
-                            .clipShape(RoundedRectangle(cornerRadius: 99))
+                        HStack {
+                            Label("비밀번호 변경", systemImage: "lock.fill")
+                                .font(.body)
+                                .fontWeight(.medium)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.blue)
+                        .padding(.vertical, 16)
                     }
-                    .padding(.bottom, 70)
-                    .frame(maxWidth: .infinity)
-
                 }
             }
         }
-        .padding(.horizontal, 37)
-        .onAppear {
-            viewModel.loadUserInfo()
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+    
+    // MARK: - 로그아웃 버튼
+    private var logoutButton: some View {
+        Button(action: {
+            viewModel.logout()
+        }) {
+            HStack {
+                Image(systemName: "rectangle.portrait.and.arrow.right")
+                    .font(.body)
+                    .fontWeight(.medium)
+                Text("로그아웃")
+                    .font(.body)
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.white)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(Color.red)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .alert(item: $alertMessage) { msg in
-            Alert(title: Text("알림"), message: Text(msg.value), dismissButton: .default(Text("확인")))
+        .padding(.horizontal, 20)
+        .padding(.bottom, 30)
+    }
+    
+    // MARK: - 섹션 헤더
+    private func sectionHeader(_ title: String) -> some View {
+        HStack {
+            Text(title)
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            Spacer()
         }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
     }
 }
