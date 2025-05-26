@@ -17,7 +17,6 @@ class SignInViewModel: ObservableObject {
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
     @Published var loginFailed: Bool = false // 추가
 
-
     private let authService = AuthService()
 
     func completeSignIn() {
@@ -30,6 +29,12 @@ class SignInViewModel: ObservableObject {
                         print("로그인 성공!")
                         self.loginSucceeded = true
                         self.isLoggedIn = true
+                        guard let respData = response.data,
+                              let fetchedId = respData.userId as Int? else {
+                              self.errorMessage = "서버 응답에 userId가 없습니다."
+                              return
+                        }
+                        UserDefaults.standard.set(fetchedId, forKey: "userId")
                         self.errorMessage = nil // 성공 시 메시지 숨김
                     } else {
                         let message = response.message?.joined(separator: "\n") ?? "알 수 없는 에러"

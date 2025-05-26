@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @AppStorage("shouldRefreshFeed") private var shouldRefreshFeed = false
     @State private var navigateToWritePost = false
     @State private var petList: [Feed] = []
     @State private var errorMessage: String?
@@ -20,6 +21,8 @@ struct HomeView: View {
                     NavigationLink(destination: FeedDetailView(feed: feed)) {
                         HomeFeedRow(feed: feed)
                     }
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                 }
                 .listStyle(.plain)
                 .navigationBarTitleDisplayMode(.inline)
@@ -27,16 +30,6 @@ struct HomeView: View {
                     ToolbarItem(placement: .topBarLeading) {
                         Text("실종 동물 찾기")
                             .font(.system(size: 20, weight: .bold))
-                    }
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        Button { } label: {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.black)
-                        }
-                        Button { } label: {
-                            Image(systemName: "bell")
-                                .foregroundColor(.black)
-                        }
                     }
                 }
                 .navigationDestination(isPresented: $navigateToWritePost) {
@@ -60,15 +53,18 @@ struct HomeView: View {
         .onAppear {
             loadFeeds()
         }
+        .onChange(of: shouldRefreshFeed) { oldValue, newValue in
+            guard newValue else { return }
+                loadFeeds()
+                shouldRefreshFeed = false
+        }
     }
 
     func loadFeeds() {
-        print("loadFeeds called")
         feedService.fetchFeeds { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let feeds):
-                    print("피드 불러오기 성공: \(feeds.count)개")
                     self.petList = feeds
                 case .failure(let error):
                     print("피드 불러오기 실패: \(error.localizedDescription)")

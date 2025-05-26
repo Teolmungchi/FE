@@ -79,7 +79,9 @@ class FeedService {
                if let http = response as? HTTPURLResponse {
                    print("↩️ [uploadImageToS3] statusCode:", http.statusCode) // ← 디버그
                }
-               let fileName = presignedURL.components(separatedBy: "?").first ?? presignedURL
+               let fileName = presignedURL
+                   .replacingOccurrences(of: "http://tmc.kro.kr:9000/tmc/", with: "")
+                   .components(separatedBy: "?").first ?? presignedURL
                print("✅ [uploadImageToS3] uploaded fileName:", fileName) // ← 디버그
                completion(.success(fileName))
            }.resume()
@@ -152,40 +154,56 @@ class FeedService {
        }
     
     func fetchFeeds(completion: @escaping (Result<[Feed], Error>) -> Void) {
-            guard let url = FeedAPI.feedListURL else {
-                completion(.failure(APIError.invalidURL))
-                return
-            }
-            // Keychain에서 토큰 가져오기
-            guard let tokenData = KeychainHelper.shared.retrieve(service: "com.syproj.general-project", account: "accessToken"),
-                  let accessToken = String(data: tokenData, encoding: .utf8) else {
-                completion(.failure(APIError.unauthorized))
-                return
-            }
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
-            URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                guard let data = data else {
-                    completion(.failure(APIError.requestFailed))
-                    return
-                }
-                do {
-                    let decoded = try JSONDecoder().decode(FeedListResponse.self, from: data)
-                    if decoded.success, let feeds = decoded.data {
-                        completion(.success(feeds))
-                    } else {
-                        completion(.failure(FeedAPIError.custom(decoded.message ?? "피드 목록을 불러오지 못했습니다.")))
-                    }
-                } catch {
-                    completion(.failure(error))
-                }
-            }.resume()
+        guard let url = FeedAPI.feedListURL else {
+            completion(.failure(APIError.invalidURL))
+            return
         }
+        guard
+            let tokenData = KeychainHelper.shared.retrieve(
+                service: "com.syproj.general-project",
+                account: "accessToken"
+            ),
+            let accessToken = String(data: tokenData, encoding: .utf8)
+        else {
+            completion(.failure(APIError.unauthorized))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            // 1) 네트워크 에러 체크
+            if let error = error {
+                print("🚨 Network error:", error)
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                print("🚨 No data")
+                completion(.failure(APIError.requestFailed))
+                return
+            }
+
+            // 5) 기존 FeedListResponse로 디코딩 시도
+            do {
+                let decoded = try JSONDecoder().decode(FeedListResponse.self, from: data)
+                if decoded.success, let feeds = decoded.data {
+                    completion(.success(feeds))
+                } else {
+                    let msg = decoded.message ?? "unknown"
+                    print("⚠️ API returned success=false, message:", msg)
+                    completion(.failure(FeedAPIError.custom(msg)))
+                }
+            } catch {
+                print("❌ Decoding FeedListResponse failed:", error)
+                completion(.failure(error))
+            }
+        }
+        .resume()
+    }
     
+  
 }

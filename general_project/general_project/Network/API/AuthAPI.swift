@@ -221,10 +221,7 @@ final class APIService {
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(.requestFailed))
-                return
-            }
+
 
             guard let data = data else {
                 completion(.failure(.requestFailed))

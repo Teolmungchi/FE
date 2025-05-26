@@ -16,15 +16,13 @@ struct ChatListView: View {
                 ForEach(viewModel.rooms) { room in
                     NavigationLink(destination: ChatRoomView(roomId: room.id)) {
                         HStack(spacing: 12) {
-                            // 2) 제목·미리보기·시간
                             VStack(alignment: .leading, spacing: 4) {
-                                // 상대방 이름으로 표시
                                 let otherName = (room.user1Id == ChatSocketManager.shared.currentUserId ?
                                                  room.user2.name : room.user1.name) ?? "알 수 없는 사용자"
                                 Text("\(otherName)님과의 채팅")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(.primary)
-                                
+
                                 if let last = room.lastMessage {
                                     Text(last)
                                         .font(.system(size: 14))
@@ -32,44 +30,56 @@ struct ChatListView: View {
                                         .lineLimit(1)
                                 }
                             }
-                            
+
                             Spacer()
-                            
-                            // 3) 마지막 수신 시간 (예: "2분 전")
-                            if let ago = room.lastMessageAgo {
-                                Text(ago)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
+
+                            VStack(alignment: .trailing, spacing: 4) {
+                                if let ago = room.lastMessageAgo {
+                                    Text(ago)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+
+                                if let count = room.unreadCount, count > 0 {
+                                    Text("\(count)")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .padding(6)
+                                        .background(Circle().fill(Color.red))
+                                }
                             }
-                        }
-                        .padding(.vertical, 8)
+                        }                        .padding(.vertical, 8)
                     }
                 }
             }
             .listStyle(PlainListStyle())
             .navigationTitle("채팅")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { /* 알림 액션 */ }
-                    label: {
-                        Image(systemName: "bell")
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("테스트 방 만들기") {
-                        viewModel.createRoom(with: 25) { newRoom in
-                            if let room = newRoom {
-                                print("▶️ 새로 만든 방:", room)
-                                viewModel.loadRooms()
-                            } else {
-                                print("▶️ 방 생성 실패")
-                            }
-                        }
-                    }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    Button("테스트 방 만들기") {
+//                        viewModel.createRoom(with: 2) { newRoom in
+//                            if let room = newRoom {
+//                                print("▶️ 새로 만든 방:", room)
+//                                viewModel.loadRooms()
+//                            } else {
+//                                print("▶️ 방 생성 실패")
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+            .onReceive(NotificationCenter.default.publisher(for: .didLeaveChatRoom)) { note in
+                viewModel.loadRooms()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .didReceiveNewMessage)) { _ in
+                withAnimation {
+                    viewModel.loadRooms()
                 }
             }
             .onAppear {
-                viewModel.loadRooms()
+                withAnimation {
+                    viewModel.loadRooms()
+                }
             }
             .alert(item: $viewModel.errorMessage) { msg in
                 Alert(title: Text("오류"), message: Text(msg), dismissButton: .default(Text("확인")))

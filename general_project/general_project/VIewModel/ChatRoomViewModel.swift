@@ -68,6 +68,8 @@ final class ChatRoomViewModel: ObservableObject {
         }
         socketManager.onJoinedRoom = { joinedRoomId in
             print("✅ ChatRoomViewModel onJoinedRoom:", joinedRoomId)
+            self.markAsRead()
+            self.loadHistory()
         }
         socketManager.onNewMessage = { [weak self] newMsg in
             DispatchQueue.main.async {
@@ -75,7 +77,6 @@ final class ChatRoomViewModel: ObservableObject {
             }
             print("📨 ChatRoomViewModel onNewMessage:", newMsg)
             // 읽음 처리
-            self?.markAsRead()
         }
     }
 
@@ -87,6 +88,8 @@ final class ChatRoomViewModel: ObservableObject {
 
     // MARK: - 읽음 처리
     func markAsRead() {
-        ChatService.shared.markRoomAsRead(roomId) { _ in /* 결과 무시 */ }
-    }
+        print("🕵️‍♂️ markAsRead called for roomId:", roomId)
+        ChatService.shared.markRoomAsRead(roomId) { result in
+            print("🕵️‍♂️ markRoomAsRead result:", result)
+        }    }
 }

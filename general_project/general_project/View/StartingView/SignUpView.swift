@@ -80,7 +80,7 @@ struct SignUpView: View {
         .sheet(isPresented: $viewModel.showCompletionModal) {
             VStack(spacing: 20) {
                 // 원하는 이미지
-                Image("catImage") // 실제 프로젝트에 맞게 수정
+                Image("mainlogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 150, height: 150)
@@ -88,13 +88,13 @@ struct SignUpView: View {
                 Text("회원가입이 완료되었습니다!")
                     .font(.headline)
                 
-                Button("완료") {
+                Button("로그인 하러 가기") {
                     // 모달 닫고, 로그인 화면으로 돌아가기
                     presentationMode.wrappedValue.dismiss()
                 }
                 .padding()
                 .frame(width: 120)
-                .background(Color.brown)
+                .background(Color.black)
                 .foregroundColor(.white)
                 .cornerRadius(8)
             }

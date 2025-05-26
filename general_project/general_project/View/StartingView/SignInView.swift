@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SignInView: View {
     @StateObject private var viewModel = SignInViewModel()
-
+    @AppStorage("userId") private var currentUserId: Int = 0
     
     
     var body: some View {
@@ -75,7 +75,4 @@ struct SignInView: View {
                         }
         }
     }
-}
-#Preview{
-    SignInView()
 }

@@ -10,6 +10,8 @@ import SwiftUI
 struct ChatRoomView: View {
     @StateObject private var viewModel: ChatRoomViewModel
     @State private var inputText: String = ""
+    let roomId: Int = 0
+    @Environment(\.dismiss) private var dismiss
     
     init(roomId: Int) {
         _viewModel = StateObject(wrappedValue: ChatRoomViewModel(roomId: roomId))
@@ -17,7 +19,6 @@ struct ChatRoomView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // 1) 메시지 리스트
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 12) {
@@ -29,22 +30,14 @@ struct ChatRoomView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
                 }
-                // 새 메시지 수신 시 자동 스크롤
-                .onChange(of: viewModel.messages.count) { _ in
-                    if let lastId = viewModel.messages.last?.id {
-                        proxy.scrollTo(lastId, anchor: .bottom)
-                    }
+                .onChange(of: viewModel.messages.count) { oldCount, newCount in
+                    guard newCount > oldCount, let lastId = viewModel.messages.last?.id else { return }
+                    proxy.scrollTo(lastId, anchor: .bottom)
                 }
             }
             
-            // 2) 입력 바
             HStack(spacing: 12) {
-                Button {
-                    // 추가 기능 (예: 사진 첨부)
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 24))
-                }
+                
                 
                 TextField("메시지를 입력하세요", text: $inputText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -67,7 +60,12 @@ struct ChatRoomView: View {
         .navigationTitle("채팅")
         .onAppear {
             // ViewModel init 에서 이미 connect, join, history 호출됨
-
+        }
+        .onDisappear {
+            NotificationCenter.default.post(
+                name: .didLeaveChatRoom,
+                object: self.roomId
+            )
         }
         .alert(item: $viewModel.errorMessage) { msg in
             Alert(title: Text("오류"), message: Text(msg), dismissButton: .default(Text("확인")))
@@ -76,11 +74,9 @@ struct ChatRoomView: View {
 }
 
 
-/// 메시지 버블 컴포넌트
 struct ChatBubbleView: View {
     let message: ChatMessage
     
-    // 현재 내 ID와 비교
     private var isCurrentUser: Bool {
         guard let myId = ChatSocketManager.shared.currentUserId else { return false }
         return message.senderId == "\(myId)"
@@ -88,10 +84,8 @@ struct ChatBubbleView: View {
     
     var body: some View {
         HStack {
-                  // 내 메시지는 오른쪽, 남의 메시지는 왼쪽
                   if isCurrentUser { Spacer(minLength: 50) }
 
-                  // 실제 버블
                   VStack(alignment: isCurrentUser ? .trailing : .leading, spacing: 4) {
                       Text(message.message)
                           .padding(10)
@@ -102,7 +96,6 @@ struct ChatBubbleView: View {
                           .font(.caption2)
                           .foregroundColor(.secondary)
                   }
-                  // 최대 너비 제한과 얼라인먼트
                   .frame(maxWidth: UIScreen.main.bounds.width * 0.7,
                          alignment: isCurrentUser ? .trailing : .leading)
 
@@ -114,7 +107,6 @@ struct ChatBubbleView: View {
     
 }
 
-/// 버블 모양 (왼/오 분기)
 struct ChatBubbleShape: Shape {
     let isFromMe: Bool
     

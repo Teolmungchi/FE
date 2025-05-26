@@ -27,7 +27,7 @@ struct ChatRoom: Codable, Identifiable {
     let user2Id: Int
     let user1: ChatUser
     let user2: ChatUser
-    let unreadCount: Int?
+    var unreadCount: Int?
     let lastMessage: String?
     let lastMessageAt: Date?
     let lastMessageAgo: String?
