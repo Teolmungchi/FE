@@ -24,10 +24,6 @@ final class StorageService {
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(StorageAPIError.requestFailed))
-                return
-            }
             if let raw = String(data: data!, encoding: .utf8) {
                 print("📥 Storage API Raw Response:\n\(raw)")
             }

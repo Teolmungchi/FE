@@ -53,12 +53,10 @@ struct HomeView: View {
         .onAppear {
             loadFeeds()
         }
-        .onChange(of: shouldRefreshFeed) { newValue in
-            if newValue {
-                print("🔁 새로고침 실행됨")
+        .onChange(of: shouldRefreshFeed) { oldValue, newValue in
+            guard newValue else { return }
                 loadFeeds()
                 shouldRefreshFeed = false
-            }
         }
     }
 

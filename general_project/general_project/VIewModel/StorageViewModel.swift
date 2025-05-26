@@ -27,7 +27,7 @@ final class StorageViewModel: ObservableObject {
                     self?.items = items
                 case .failure(let error):
                     self?.errorMessage = error.localizedDescription
-                    print("매칭 리스트 조회 실패: \(self?.errorMessage)")
+                    print("매칭 리스트 조회 실패: \(self?.errorMessage ?? "에러")")
 
                 }
             }

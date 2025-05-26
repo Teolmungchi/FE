@@ -30,10 +30,9 @@ struct ChatRoomView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
                 }
-                .onChange(of: viewModel.messages.count) { _ in
-                    if let lastId = viewModel.messages.last?.id {
-                        proxy.scrollTo(lastId, anchor: .bottom)
-                    }
+                .onChange(of: viewModel.messages.count) { oldCount, newCount in
+                    guard newCount > oldCount, let lastId = viewModel.messages.last?.id else { return }
+                    proxy.scrollTo(lastId, anchor: .bottom)
                 }
             }
             
