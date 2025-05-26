@@ -97,7 +97,7 @@ struct MatchResponseData: Codable {
     let feedId: Int
     let authorId: Int
     let reporterId: Int
-    let similarity: Int
+    let similarity: Double
     let saved: Bool
     let message: String?
     

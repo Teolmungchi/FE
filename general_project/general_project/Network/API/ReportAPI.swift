@@ -8,7 +8,7 @@
 import Foundation
 
 enum ReportAPI {
-    static let AIBaseURL = "https://47f7-125-133-62-199.ngrok-free.app"
+    static let AIBaseURL = "https://d556-175-115-121-230.ngrok-free.app"
     static let baseURL = "https://tmc.kro.kr"
 
     static var predictURL: URL? {
