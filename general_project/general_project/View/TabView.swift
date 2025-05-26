@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selection: Int = 0
+//    @State private var selection: Int = 0
+    @AppStorage("selectedTab") private var selection: Int = 0   // State → AppStorage
+
     var body: some View {
         TabView(selection: $selection) {
             HomeView()
@@ -17,13 +19,13 @@ struct ContentView: View {
                     Text("홈")
                 }
                 .tag(0)
-            BView()
+            StorageView()
                 .tabItem {
                     Image(systemName: selection == 1 ? "archivebox.fill" : "archivebox")
                     Text("보관함")
                 }
                 .tag(1)
-            AView()
+            ReportView()
                 .tabItem {
                     Image(systemName: selection == 2 ? "camera.fill" : "camera")
                     Text("신고")
