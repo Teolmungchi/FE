@@ -10,6 +10,8 @@ import SwiftUI
 struct ChatRoomView: View {
     @StateObject private var viewModel: ChatRoomViewModel
     @State private var inputText: String = ""
+    let roomId: Int = 0
+    @Environment(\.dismiss) private var dismiss
     
     init(roomId: Int) {
         _viewModel = StateObject(wrappedValue: ChatRoomViewModel(roomId: roomId))
@@ -59,7 +61,12 @@ struct ChatRoomView: View {
         .navigationTitle("채팅")
         .onAppear {
             // ViewModel init 에서 이미 connect, join, history 호출됨
-
+        }
+        .onDisappear {
+            NotificationCenter.default.post(
+                name: .didLeaveChatRoom,
+                object: self.roomId
+            )
         }
         .alert(item: $viewModel.errorMessage) { msg in
             Alert(title: Text("오류"), message: Text(msg), dismissButton: .default(Text("확인")))

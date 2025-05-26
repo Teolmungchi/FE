@@ -185,6 +185,8 @@ struct ChatAPI: ChatAPIProtocol {
                     let code = (resp as? HTTPURLResponse)?.statusCode ?? -1
                     return completion(.failure(.unexpectedStatusCode(code)))
                 }
+                print("✅ [ChatService] markRoomAsRead status:",
+                             (resp as? HTTPURLResponse)?.statusCode ?? -1)
                 completion(.success(()))
             }.resume()
         }

@@ -44,4 +44,17 @@ final class ChatRoomsViewModel: ObservableObject {
             }
         }
     }
+    
+    func markRoomAsRead(roomId: Int) {
+        if let index = rooms.firstIndex(where: { $0.id == roomId }) {
+            rooms[index].unreadCount = 0
+        }
+    }
+    
+}
+
+extension Notification.Name {
+    static let didReceiveNewMessage = Notification.Name("didReceiveNewMessage")
+    static let didLeaveChatRoom = Notification.Name("didLeaveChatRoom")
+
 }

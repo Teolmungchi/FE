@@ -169,6 +169,7 @@ final class ChatSocketManager {
                        print("🟢 newMessage 디코딩 성공:", msg!)
                        DispatchQueue.main.async {
                            self?.onNewMessage?(msg!)
+                           NotificationCenter.default.post(name: .didReceiveNewMessage, object: nil)
                        }
                    } catch {
                        print("⚠️ newMessage 디코딩 에러:", error)
