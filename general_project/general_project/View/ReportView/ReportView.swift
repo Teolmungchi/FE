@@ -195,6 +195,8 @@ struct ReportView: View {
                         withAnimation {
                             vm.showConfirmModal = false
                         }
+                        vm.showMatchSheet = true
+                        vm.removeSelectedImage()
                     }
                 )
                 .transition(.scale.combined(with: .opacity))

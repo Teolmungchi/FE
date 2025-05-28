@@ -58,34 +58,44 @@ class FeedService {
        }
 
        // 2. Presigned URL로 이미지 업로드
-       func uploadImageToS3(image: UIImage, presignedURL: String, completion: @escaping (Result<String, Error>) -> Void) {
-           guard let url = URL(string: presignedURL),
-                 let imageData = image.jpegData(compressionQuality: 0.8) else {
-               print("❌ [uploadImageToS3] invalid presignedURL or imageData") // ← 디버그
-               completion(.failure(APIError.invalidURL))
-               return
-           }
-           var request = URLRequest(url: url)
-           request.httpMethod = "PUT"
-           request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
-           print("▶️ [uploadImageToS3] PUT \(url) - dataSize:", imageData.count) // ← 디버그
+    // FeedService.swift 내 uploadImageToS3 메서드
+    func uploadImageToS3(
+        image: UIImage,
+        presignedURL: String,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        guard let url = URL(string: presignedURL),
+              let imageData = image.jpegData(compressionQuality: 0.8)
+        else {
+            print("❌ [uploadImageToS3] invalid URL or imageData")
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
 
-           URLSession.shared.uploadTask(with: request, from: imageData) { _, response, error in
-               if let error = error {
-                   print("❌ [uploadImageToS3] upload error:", error) // ← 디버그
-                   completion(.failure(error))
-                   return
-               }
-               if let http = response as? HTTPURLResponse {
-                   print("↩️ [uploadImageToS3] statusCode:", http.statusCode) // ← 디버그
-               }
-               let fileName = presignedURL
-                   .replacingOccurrences(of: "http://tmc.kro.kr:9000/tmc/", with: "")
-                   .components(separatedBy: "?").first ?? presignedURL
-               print("✅ [uploadImageToS3] uploaded fileName:", fileName) // ← 디버그
-               completion(.success(fileName))
-           }.resume()
-       }
+        print("▶️ [uploadImageToS3] PUT 시작: \(url)\n데이터 크기: \(imageData.count) bytes")
+        URLSession.shared.uploadTask(with: request, from: imageData) { _, response, error in
+            if let err = error {
+                print("❌ [uploadImageToS3] 네트워크 에러:", err)
+                return completion(.failure(err))
+            }
+            if let http = response as? HTTPURLResponse {
+                print("↩️ [uploadImageToS3] statusCode:", http.statusCode)
+                if !(200..<300).contains(http.statusCode) {
+                    let msg = "PUT 실패 HTTP \(http.statusCode)"
+                    print("⚠️ [uploadImageToS3] 에러 메시지:", msg)
+                    return completion(.failure(APIError.requestFailed))
+                }
+            }
+            // fileName 추출부
+            let key = url.pathComponents.last ?? ""
+            print("✅ [uploadImageToS3] 업로드 완료, key:", key)
+            completion(.success(key))
+        }
+        .resume()
+    }
 
        // 3. 피드 생성 요청
        func createFeed(request: FeedRequest, completion: @escaping (Result<FeedData, Error>) -> Void) {

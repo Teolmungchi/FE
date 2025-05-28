@@ -54,20 +54,6 @@ struct ChatListView: View {
             }
             .listStyle(PlainListStyle())
             .navigationTitle("채팅")
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    Button("테스트 방 만들기") {
-//                        viewModel.createRoom(with: 2) { newRoom in
-//                            if let room = newRoom {
-//                                print("▶️ 새로 만든 방:", room)
-//                                viewModel.loadRooms()
-//                            } else {
-//                                print("▶️ 방 생성 실패")
-//                            }
-//                        }
-//                    }
-//                }
-//            }
             .onReceive(NotificationCenter.default.publisher(for: .didLeaveChatRoom)) { note in
                 viewModel.loadRooms()
             }

@@ -17,7 +17,7 @@ struct StorageItem: Identifiable, Codable, Hashable {
     let finderId: Int
     let message: String
     let presignedURL: URL
-    let finderPresignedURL: URL?
+    let finderPresignedURL: URL
     var id = UUID()
 
 
