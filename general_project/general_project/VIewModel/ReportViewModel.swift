@@ -73,7 +73,7 @@ class ReportViewModel: ObservableObject {
                                 case .success(let matchResponse):
                                     print("💡 매칭 결과 전송 완료:\(matchResponse)")
                                     DispatchQueue.main.async {
-                                        self?.showMatchSheet = true
+//                                        self?.showMatchSheet = true
                                         self?.matchResponse = matchResponse
                                     }
                                 case .failure(let err):

@@ -146,30 +146,86 @@ struct ChatAPI: ChatAPIProtocol {
         }
     }
     
-    func createChatRoom(user2Id: Int, completion: @escaping (Result<ChatRoom, ChatAPIError>) -> Void) {
+    func createChatRoom(
+        user2Id: Int,
+        completion: @escaping (Result<ChatRoom, ChatAPIError>) -> Void
+    ) {
+        // 0) Body 직렬화
         let bodyDict = ["user2Id": user2Id]
         guard let bodyData = try? JSONSerialization.data(withJSONObject: bodyDict) else {
-            return completion(.failure(.invalidURL))
+            print("❌ [createChatRoom] JSONSerialization 실패, body:", bodyDict)
+            DispatchQueue.main.async {
+                completion(.failure(.encodingFailed))
+            }
+            return
         }
 
+        // 1) URLRequest 생성
         switch makeRequest(path: "room", method: "POST", body: bodyData) {
-        case .failure(let err): return completion(.failure(err))
-        case .success(let req):
-            URLSession.shared.dataTask(with: req) { data, resp, err in
-                if let e = err { return completion(.failure(.network(e))) }
-                guard let http = resp as? HTTPURLResponse,
-                      (200..<300).contains(http.statusCode),
-                      let d = data else {
-                    let code = (resp as? HTTPURLResponse)?.statusCode ?? -1
-                    return completion(.failure(.unexpectedStatusCode(code)))
+        case .failure(let err):
+            print("❌ [createChatRoom] makeRequest 실패:", err)
+            DispatchQueue.main.async {
+                completion(.failure(err))
+            }
+
+        case .success(let request):
+            // 디버그: 요청 정보 출력
+            print("▶️ [createChatRoom] \(request.httpMethod ?? "") \(request.url?.absoluteString ?? "")")
+            print("   headers:", request.allHTTPHeaderFields ?? [:])
+            if let bodyString = String(data: bodyData, encoding: .utf8) {
+                print("   body:", bodyString)
+            }
+
+            // 2) 네트워크 호출
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                // 네트워크 에러
+                if let err = error {
+                    print("❌ [createChatRoom] 네트워크 에러:", err)
+                    DispatchQueue.main.async {
+                        completion(.failure(.network(err)))
+                    }
+                    return
                 }
+
+                // HTTP 상태 코드
+                guard let http = response as? HTTPURLResponse else {
+                    print("❌ [createChatRoom] HTTPURLResponse 아님:", response ?? "nil response")
+                    DispatchQueue.main.async {
+                        completion(.failure(.invalidResponse))
+                    }
+                    return
+                }
+                print("↩️ [createChatRoom] statusCode:", http.statusCode)
+
+                // 응답 바디
+                if let data = data, let body = String(data: data, encoding: .utf8) {
+                    print("↩️ [createChatRoom] response body:\n\(body)")
+                }
+
+                // 비정상 코드 분기
+                guard (200..<300).contains(http.statusCode) else {
+                    print("⚠️ [createChatRoom] unexpected status code:", http.statusCode)
+                    DispatchQueue.main.async {
+                        completion(.failure(.unexpectedStatusCode(http.statusCode)))
+                    }
+                    return
+                }
+
+                // 3) JSON 디코딩
                 do {
-                    let room = try decoder.decode(ChatRoom.self, from: d)
-                    completion(.success(room))
+                    let room = try decoder.decode(ChatRoom.self, from: data!)
+                    print("✅ [createChatRoom] 디코딩 성공:", room)
+                    DispatchQueue.main.async {
+                        completion(.success(room))
+                    }
                 } catch {
-                    completion(.failure(.decoding(error)))
+                    print("❌ [createChatRoom] 디코딩 실패:", error)
+                    DispatchQueue.main.async {
+                        completion(.failure(.decoding(error)))
+                    }
                 }
-            }.resume()
+            }
+            .resume()
         }
     }
 

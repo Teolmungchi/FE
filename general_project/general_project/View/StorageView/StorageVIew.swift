@@ -24,9 +24,15 @@ struct StorageView: View {
                         .multilineTextAlignment(.center)
                         .padding()
                 } else {
-                    List(viewModel.items, id: \.self) { item in
+                    List(viewModel.items) { item in
                         HStack(spacing: 12) {
                             KFImage(item.finderPresignedURL)
+//                                .onSuccess { result in
+//                                                    print("✅ Kingfisher success:", result.source.url?.absoluteString ?? "no URL")
+//                                                }
+//                                                .onFailure { error in
+//                                                    print("❌ Kingfisher failure:", error)
+//                                                }
                                 .placeholder { ProgressView() }
                                 .retry(maxCount: 3, interval: .seconds(5))
                                 .cacheOriginalImage()

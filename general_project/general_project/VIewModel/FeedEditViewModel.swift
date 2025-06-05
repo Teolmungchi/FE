@@ -11,7 +11,7 @@ import SwiftUI
 class FeedEditViewModel: ObservableObject {
     @Published var title: String
     @Published var content: String
-    @Published var fileName: String
+    @Published var presignedUrl: String
     @Published var lostDate: Date
     @Published var lostPlace: String
     @Published var placeFeature: String
@@ -37,7 +37,7 @@ class FeedEditViewModel: ObservableObject {
         // 초기값 세팅
         self.title        = f.title
         self.content      = f.content
-        self.fileName     = f.fileName ?? ""
+        self.presignedUrl     = f.presignedUrl ?? ""
         self.lostDate     = parsedDate
         self.lostPlace    = f.lostPlace   ?? ""
         self.placeFeature = f.placeFeature ?? ""
@@ -61,7 +61,7 @@ class FeedEditViewModel: ObservableObject {
             author: detailVM.feed.author,
             title: title,
             content: content,
-            fileName: fileName.isEmpty ? nil : fileName,
+            presignedUrl: presignedUrl.isEmpty ? nil : presignedUrl,
             lostDate: lostDateStr,
             lostPlace: lostPlace.isEmpty ? nil : lostPlace,
             placeFeature: placeFeature.isEmpty ? nil : placeFeature,

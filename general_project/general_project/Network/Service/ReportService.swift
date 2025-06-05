@@ -40,7 +40,7 @@ class ReportService {
                 completion(.failure(.requestFailed))
                 return
             }
-
+            
             do {
                 let decoded = try JSONDecoder().decode(AllURLResponseModel.self, from: data)
                 print("✅ Decoded AllURLResponseModel:")
@@ -59,7 +59,7 @@ class ReportService {
         }
         .resume()
     }
-
+    
     func sendReport(
         images: [ReportImage],
         originImageData: Data,
@@ -69,14 +69,14 @@ class ReportService {
             completion(.failure(.invalidURL))
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.setValue("69420", forHTTPHeaderField: "ngrok-skip-browser-warning")
         var body = Data()
-
+        
         // JSON part
         let jsonData = try! JSONEncoder().encode(images)
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -84,18 +84,18 @@ class ReportService {
         body.append("Content-Type: application/json; charset=UTF-8\r\n\r\n".data(using: .utf8)!)
         body.append(jsonData)
         body.append("\r\n".data(using: .utf8)!)
-
+        
         // Image part
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"origin_image\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
         body.append(originImageData)
         body.append("\r\n".data(using: .utf8)!)
-
+        
         // Boundary 마무리
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
-
+        
         // 디버깅 로그
         let bodyData = body
         let imageHeaderString = "Content-Disposition: form-data; name=\"origin_image\"; filename=\"image.jpg\""
@@ -103,26 +103,26 @@ class ReportService {
            bodyText.contains(imageHeaderString) {
             print("✅ origin_image 파트 헤더 발견!")
         }
-
+        
         // 요청 보내기
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("❌ [sendReport] network error:", error.localizedDescription)
                 return completion(.failure(.requestFailed))
             }
-
+            
             guard let http = response as? HTTPURLResponse else {
                 print("❌ [sendReport] not HTTPURLResponse")
                 return completion(.failure(.invalidResponse))
             }
-
+            
             print("📡 [sendReport] statusCode:", http.statusCode)
-
+            
             guard let data = data else {
                 print("❌ [sendReport] response body 없음")
                 return completion(.failure(.invalidResponse))
             }
-
+            
             if (200..<300).contains(http.statusCode) {
                 do {
                     let decoded = try JSONDecoder().decode(ReportResponse.self, from: data)
@@ -139,7 +139,7 @@ class ReportService {
             }
         }.resume()
     }
-
+    
     func sendMatchResult(
         from response: ReportResponse,
         completion: @escaping (Result<MatchResponse, ReportAPIError>) -> Void
@@ -148,34 +148,34 @@ class ReportService {
             completion(.failure(.invalidURL))
             return
         }
-
+        
         guard let tokenData = KeychainHelper.shared.retrieve(service: "com.syproj.general-project", account: "accessToken"),
               let accessToken = String(data: tokenData, encoding: .utf8) else {
             completion(.failure(.unauthorized))
             return
         }
-
+        
         let matchResults: [MatchResult] = response.results.compactMap { result in
             guard let authorId = Int(result.authorId),
                   let feedId = Int(result.feedId)
             else {
                 return nil
             }
-
+            
             return MatchResult(
                 authorId: authorId,
                 feedId: feedId,
                 similarityScore: Float(result.similarityScore)
             )
         }
-
+        
         let payload = MatchRequest(results: matchResults)
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
+        
         do {
             let bodyData = try JSONEncoder().encode(payload)
             if let bodyString = String(data: bodyData, encoding: .utf8) {
@@ -186,19 +186,19 @@ class ReportService {
             completion(.failure(.encodingFailed))
             return
         }
-
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let http = response as? HTTPURLResponse else {
                 return completion(.failure(.invalidResponse))
             }
-
+            
             print("📡 [sendMatchResult] statusCode:", http.statusCode)
-
+            
             guard (200..<300).contains(http.statusCode), let data = data else {
                 let msg = data.flatMap { String(data: $0, encoding: .utf8) } ?? "\(http.statusCode)"
                 return completion(.failure(.custom(msg)))
             }
-
+            
             do {
                 let decoded = try JSONDecoder().decode(MatchResponse.self, from: data)
                 print("✅ 매칭 응답 디코딩 성공:", decoded.data)
@@ -212,64 +212,100 @@ class ReportService {
     }
     
     func saveReportImage(
-          image: UIImage,
-          completion: @escaping (Result<Void, ReportAPIError>) -> Void
-      ) {
-          let feedService = FeedService()
-          guard let tokenData = KeychainHelper.shared.retrieve(service: "com.syproj.general-project", account: "accessToken"),
-                let accessToken = String(data: tokenData, encoding: .utf8) else {
-              completion(.failure(.unauthorized))
-              return
-          }
-          // 1) Presigned URL 요청
-          feedService.fetchPresignedURL { result in
-              switch result {
-              case .success(let presignedURL):
-                  // 2) S3에 업로드
-                  feedService.uploadImageToS3(image: image, presignedURL: presignedURL) { uploadResult in
-                      switch uploadResult {
-                      case .success(let fileName):
-                          // 3) 서버에 fileName 저장
-                          guard let url = ReportAPI.reportImageURL else {
-                              return completion(.failure(.invalidURL))
-                          }
-                          var request = URLRequest(url: url)
-                          request.httpMethod = "POST"
-                          request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                          request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        image: UIImage,
+        completion: @escaping (Result<Void, ReportAPIError>) -> Void
+    ) {
+        let feedService = FeedService()
+        // 0) 토큰 확보
+        guard let tokenData = KeychainHelper.shared.retrieve(
+                service: "com.syproj.general-project",
+                account: "accessToken"
+              ),
+              let accessToken = String(data: tokenData, encoding: .utf8)
+        else {
+            print("❌ [saveReportImage] no access token")
+            completion(.failure(.unauthorized))
+            return
+        }
+        print("▶️ [saveReportImage] 시작")
 
-                          let payload = ReportImageRequestModel(fileName: fileName)
-                          do {
-                              request.httpBody = try JSONEncoder().encode(payload)
-                          } catch {
-                              return completion(.failure(.encodingFailed))
-                          }
+        // 1) Presigned URL 요청
+        feedService.fetchPresignedURL { result in
+            switch result {
+            case .failure(let err):
+                print("❌ [fetchPresignedURL] 실패:", err)
+                completion(.failure(.custom(err.localizedDescription)))
 
-                          URLSession.shared.dataTask(with: request) { data, response, error in
-                              if let _ = error {
-                                  return completion(.failure(.requestFailed))
-                              }
-                              guard let http = response as? HTTPURLResponse else {
-                                  return completion(.failure(.invalidResponse))
-                              }
-                              if (200..<300).contains(http.statusCode) {
-                                  completion(.success(()))
-                              } else {
-                                  let msg = data.flatMap { String(data: $0, encoding: .utf8) }
-                                          ?? "HTTP \(http.statusCode)"
-                                  completion(.failure(.custom(msg)))
-                              }
-                          }
-                          .resume()
+            case .success(let presignedURL):
+                print("✅ [fetchPresignedURL] 성공:", presignedURL)
 
-                      case .failure(let err):
-                          completion(.failure(.custom(err.localizedDescription)))
-                      }
-                  }
-                  
-              case .failure(let err):
-                  completion(.failure(.custom(err.localizedDescription)))
-              }
-          }
-      }}
+                // 2) S3에 업로드
+                guard let data = image.jpegData(compressionQuality: 0.8) else {
+                    print("❌ [uploadImageToS3] imageData 생성 실패")
+                    completion(.failure(.encodingFailed))
+                    return
+                }
+                print("▶️ [uploadImageToS3] PUT \(presignedURL) - dataSize:", data.count)
+
+                feedService.uploadImageToS3(image: image, presignedURL: presignedURL) { uploadResult in
+                    switch uploadResult {
+                    case .failure(let err):
+                        print("❌ [uploadImageToS3] 실패:", err)
+                        completion(.failure(.custom(err.localizedDescription)))
+
+                    case .success(let fileName):
+                        print("✅ [uploadImageToS3] 성공, fileName:", fileName)
+
+                        // 3) 서버에 fileName 저장
+                        guard let url = ReportAPI.reportImageURL else {
+                            print("❌ [saveReportImage] invalidURL")
+                            return completion(.failure(.invalidURL))
+                        }
+                        var request = URLRequest(url: url)
+                        request.httpMethod = "POST"
+                        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+                        let payload = ReportImageRequestModel(fileName: fileName)
+                        do {
+                            let bodyData = try JSONEncoder().encode(payload)
+                            request.httpBody = bodyData
+                            if let jsonString = String(data: bodyData, encoding: .utf8) {
+                                print("▶️ [saveReportImage] POST \(url)\nheaders: \(request.allHTTPHeaderFields ?? [:])\nbody:", jsonString)
+                            }
+                        } catch {
+                            print("❌ [saveReportImage] JSON 인코딩 실패:", error)
+                            return completion(.failure(.encodingFailed))
+                        }
+
+                        URLSession.shared.dataTask(with: request) { data, response, error in
+                            if let err = error {
+                                print("❌ [saveReportImage] network error:", err)
+                                return completion(.failure(.requestFailed))
+                            }
+                            guard let http = response as? HTTPURLResponse else {
+                                print("❌ [saveReportImage] invalidResponse")
+                                return completion(.failure(.invalidResponse))
+                            }
+                            print("↩️ [saveReportImage] statusCode:", http.statusCode)
+                            if let data = data,
+                               let body = String(data: data, encoding: .utf8) {
+                                print("↩️ [saveReportImage] response body:\n", body)
+                            }
+                            if (200..<300).contains(http.statusCode) {
+                                print("🎉 [saveReportImage] 완료")
+                                completion(.success(()))
+                            } else {
+                                let msg = data.flatMap { String(data: $0, encoding: .utf8) } ?? "\(http.statusCode)"
+                                print("⚠️ [saveReportImage] 서버 에러:", msg)
+                                completion(.failure(.custom(msg)))
+                            }
+                        }
+                        .resume()
+                    }
+                }
+            }
+        }
+    }
+}
 

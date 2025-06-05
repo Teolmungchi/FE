@@ -53,7 +53,7 @@ class FeedDetailViewModel: ObservableObject {
         struct UpdateReq: Codable {
             let title: String
             let content: String
-            let fileName: String?
+            let presignedUrl: String?
             let lostDate: String?
             let lostPlace: String?
             let placeFeature: String?
@@ -66,7 +66,7 @@ class FeedDetailViewModel: ObservableObject {
         let reqBody = UpdateReq(
             title: updated.title,
             content: updated.content,
-            fileName: updated.fileName,
+            presignedUrl: updated.presignedUrl,
             lostDate: updated.lostDate,
             lostPlace: updated.lostPlace,
             placeFeature: updated.placeFeature,

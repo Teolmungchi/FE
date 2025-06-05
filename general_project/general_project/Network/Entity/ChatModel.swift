@@ -43,6 +43,29 @@ struct ChatRoom: Codable, Identifiable {
         case lastMessageAt
         case lastMessageAgo
     }
+    init(from decoder: Decoder) throws {
+         let c = try decoder.container(keyedBy: CodingKeys.self)
+         id            = try c.decode(Int.self,    forKey: .id)
+         user1Id       = try c.decode(Int.self,    forKey: .user1Id)
+         user2Id       = try c.decode(Int.self,    forKey: .user2Id)
+
+         // 서버에 user1/user2 키가 없으면, 최소한 id만 있는 ChatUser 생성
+         if let u1 = try c.decodeIfPresent(ChatUser.self, forKey: .user1) {
+             user1 = u1
+         } else {
+             user1 = ChatUser(id: user1Id, serialId: nil, name: nil)
+         }
+         if let u2 = try c.decodeIfPresent(ChatUser.self, forKey: .user2) {
+             user2 = u2
+         } else {
+             user2 = ChatUser(id: user2Id, serialId: nil, name: nil)
+         }
+
+         unreadCount   = try c.decodeIfPresent(Int.self,    forKey: .unreadCount)
+         lastMessage   = try c.decodeIfPresent(String.self, forKey: .lastMessage)
+         lastMessageAt = try c.decodeIfPresent(Date.self,   forKey: .lastMessageAt)
+         lastMessageAgo = try? c.decodeIfPresent(String.self, forKey: .lastMessageAgo)
+     }
 }
 
 // MARK: - 채팅 메시지 모델

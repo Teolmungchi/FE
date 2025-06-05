@@ -38,7 +38,7 @@ struct HomeFeedRow: View {
     // MARK: - Image Section
     private var imageSection: some View {
         GeometryReader { geometry in
-            let imageURLString = "\(imageBaseURL)\(feed.fileName ?? "")"
+            let imageURLString = "\(feed.presignedUrl ?? "")"
             
             KFImage.url(URL(string: imageURLString))
                 .placeholder {
