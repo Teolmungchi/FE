@@ -108,7 +108,7 @@ struct FeedDetailView: View {
     
     // MARK: - 이미지 섹션
     private func imageSection(geometry: GeometryProxy) -> some View {
-        let imageURLString = "\(imageBaseURL)\(viewModel.feed.fileName ?? "")"
+        let imageURLString = "\(viewModel.feed.presignedUrl ?? "")"
         
         return ZStack(alignment: .bottomLeading) {
             KFImage.url(URL(string: imageURLString))

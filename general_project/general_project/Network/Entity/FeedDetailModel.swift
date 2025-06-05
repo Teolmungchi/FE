@@ -17,7 +17,7 @@ struct Feed: Codable, Identifiable {
     let author: FeedAuthor
     let title: String
     let content: String
-    let fileName: String?
+    let presignedUrl: String?
     let lostDate: String?
     let lostPlace: String?
     let placeFeature: String?
